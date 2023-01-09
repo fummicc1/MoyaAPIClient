@@ -1,3 +1,3 @@
 # MoyaAPIClient
 
-A description of this package.
+This library is super simple APIClient based on [Moya](https://github.com/Moya/Moya).
