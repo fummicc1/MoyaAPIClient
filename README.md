@@ -78,7 +78,7 @@ let apiClient = APIClientImpl<APIRequest>
 ```swift
 
 public struct Response: Decodable {
-    public let results: [[Result]]
+    public let results: [Result]
 }
 
 public extension Response {
