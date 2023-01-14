@@ -8,8 +8,7 @@ public protocol APIClient<Target> {
 }
 
 public enum APIClientError: Error {
-    case invalidResponse(data: Data)
-    case faildToDecodeCodable(json: [String: String])
+    case faildToDecodeCodable(DecodingError)
     case underlying(Error)
 }
 
@@ -48,6 +47,10 @@ extension APIClientImpl: APIClient {
                         continuation.resume(returning: codableResponse)
                     }
                     catch {
+                        if let error = error as? DecodingError {
+                            continuation.resume(throwing: APIClientError.faildToDecodeCodable(error))
+                            return
+                        }
                         continuation.resume(throwing: APIClientError.underlying(error))
                     }
                 }
