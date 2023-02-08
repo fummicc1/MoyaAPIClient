@@ -1,10 +1,16 @@
 import Foundation
 import Moya
 
-public protocol APIClient<Target> {
-    associatedtype Target: TargetType
+protocol APIClientType<Target> {
+    associatedtype Target: APITarget
+
+    @available(swift, deprecated: 1.2.0, renamed: "send")
     func request<Response: Decodable>(with target: Target) async throws -> Response
+    @available(swift, deprecated: 1.2.0, renamed: "send")
     func request(with target: Target) async throws
+
+    func send<Response: Decodable>(with target: Target) async throws -> Response
+    func send(with target: Target) async throws
 }
 
 public enum APIClientError: Error {
@@ -12,20 +18,15 @@ public enum APIClientError: Error {
     case underlying(Error)
 }
 
-public struct APIClientImpl<Target: TargetType> {
+public struct APIClient<Target: APITarget> {
     private var provider: MoyaProvider<Target>
-    private let jsonDecoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
-    }()
 
     public init(provider: MoyaProvider<Target> = .init()) {
         self.provider = provider
     }
 
     public static func stub() -> Self {
-        APIClientImpl(
+        APIClient(
             provider: MoyaProvider<Target>(
                 stubClosure: MoyaProvider.immediatelyStub
             )
@@ -33,9 +34,9 @@ public struct APIClientImpl<Target: TargetType> {
     }
 }
 
-extension APIClientImpl: APIClient {
+extension APIClient: APIClientType {
 
-    public func request<Response>(with target: Target) async throws -> Response where Response : Decodable {
+    public func send<Response>(with target: Target) async throws -> Response where Response : Decodable {
         let response: Response = try await withCheckedThrowingContinuation { continuation in
             provider.request(target) { result in
                 switch result {
@@ -43,7 +44,7 @@ extension APIClientImpl: APIClient {
                     continuation.resume(throwing: APIClientError.underlying(error))
                 case .success(let response):
                     do {
-                        let codableResponse = try jsonDecoder.decode(Response.self, from: response.data)
+                        let codableResponse = try target.decoder.decode(Response.self, from: response.data)
                         continuation.resume(returning: codableResponse)
                     }
                     catch {
@@ -59,7 +60,7 @@ extension APIClientImpl: APIClient {
         return response
     }
 
-    public func request(with target: Target) async throws {
+    public func send(with target: Target) async throws {
         let _: Void = try await withCheckedThrowingContinuation({ continuation in
             provider.request(target) { result in
                 switch result {
@@ -72,4 +73,13 @@ extension APIClientImpl: APIClient {
         })
     }
 
+    @available(swift, deprecated: 1.2.0, renamed: "send")
+    public func request<Response>(with target: Target) async throws -> Response where Response : Decodable {
+        try await send(with: target)
+    }
+
+    @available(swift, deprecated: 1.2.0, renamed: "send")
+    public func request(with target: Target) async throws {
+        try await send(with: target)
+    }
 }
