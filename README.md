@@ -8,7 +8,7 @@ This library is super simple APIClient based on [Moya](https://github.com/Moya/M
 Add below line to your `Package.swift`.
 
 ```swift
-.package(url: "https://github.com/fummicc1/MoyaAPIClient", .upToNextMajor(from: "1.0.0")),
+.package(url: "https://github.com/fummicc1/MoyaAPIClient", .upToNextMajor(from: "1.1.0")),
 ```
 
 and use `MoyaAPIClient` library.
@@ -19,7 +19,7 @@ and use `MoyaAPIClient` library.
 
 # Usage
 
-1. Define your `TargetType`
+1. Define your `APITarget` (`APITarget` conforms to `Moya.TargetType`)
 
 ```swift
 import Moya
@@ -28,7 +28,7 @@ public enum APIRequest {
     case index(text: String)
 }
 
-extension APIRequest: TargetType {
+extension APIRequest: APITarget {
     public var baseURL: URL {
         URL(string: "https://example.com")!
     }
@@ -65,15 +65,7 @@ extension APIRequest: TargetType {
 }
 ```
 
-2. Build APIClient with defined Target
-
-```swift
-let apiClient = APIClientImpl<APIRequest>
-// you can also hide concrete type.
-// let apiClient: any APIClient<APIRequest> = APIClientImpl<APIRequest>
-```
-
-3. Call api request
+2. Call api request
 
 ```swift
 
@@ -87,7 +79,8 @@ public extension Response {
     }
 }
 
-let resppnse: Response = try await apiClient.request(with: .index(text: message))
+let request: APIRequest = .index(text: "message")
+let resppnse: Response = try await request.send()
 ```
 
 
