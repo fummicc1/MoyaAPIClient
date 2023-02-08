@@ -50,14 +50,14 @@ final class APIClientTests: XCTestCase {
     }
 
     func test() async throws {
-        let client = APIClientImpl<SimpleRequest>.stub()
+        let client = APIClient<SimpleRequest>.stub()
         let expectedResponse = SimpleResponse(message: "This is stub message.")
         let response: SimpleResponse = try await client.send(with: .index)
         XCTAssertEqual(response, expectedResponse)
     }
 
     func test_decodingError() async throws {
-        let client = APIClientImpl<SimpleRequest>.stub()
+        let client = APIClient<SimpleRequest>.stub()
         let expectedCodingKeyForError = SimpleResponse.CodingKeys.message
         do {
             let _: SimpleResponse = try await client.send(with: .failableIndex)
@@ -72,5 +72,12 @@ final class APIClientTests: XCTestCase {
             }
         }
         XCTFail()
+    }
+
+    func test_target_oriented_api() async throws {
+        let expectedResponse = SimpleResponse(message: "This is stub message.")
+        let request = SimpleRequest.index
+        let response: SimpleResponse = try await request.send(client: .stub())
+        XCTAssertEqual(response, expectedResponse)
     }
 }

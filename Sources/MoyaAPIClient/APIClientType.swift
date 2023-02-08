@@ -1,7 +1,7 @@
 import Foundation
 import Moya
 
-public protocol APIClient<Target> {
+protocol APIClientType<Target> {
     associatedtype Target: APITarget
 
     @available(swift, deprecated: 1.2.0, renamed: "send")
@@ -18,7 +18,7 @@ public enum APIClientError: Error {
     case underlying(Error)
 }
 
-public struct APIClientImpl<Target: APITarget> {
+public struct APIClient<Target: APITarget> {
     private var provider: MoyaProvider<Target>
 
     public init(provider: MoyaProvider<Target> = .init()) {
@@ -26,7 +26,7 @@ public struct APIClientImpl<Target: APITarget> {
     }
 
     public static func stub() -> Self {
-        APIClientImpl(
+        APIClient(
             provider: MoyaProvider<Target>(
                 stubClosure: MoyaProvider.immediatelyStub
             )
@@ -34,7 +34,7 @@ public struct APIClientImpl<Target: APITarget> {
     }
 }
 
-extension APIClientImpl: APIClient {
+extension APIClient: APIClientType {
 
     public func send<Response>(with target: Target) async throws -> Response where Response : Decodable {
         let response: Response = try await withCheckedThrowingContinuation { continuation in
@@ -73,10 +73,12 @@ extension APIClientImpl: APIClient {
         })
     }
 
+    @available(swift, deprecated: 1.2.0, renamed: "send")
     public func request<Response>(with target: Target) async throws -> Response where Response : Decodable {
         try await send(with: target)
     }
 
+    @available(swift, deprecated: 1.2.0, renamed: "send")
     public func request(with target: Target) async throws {
         try await send(with: target)
     }
