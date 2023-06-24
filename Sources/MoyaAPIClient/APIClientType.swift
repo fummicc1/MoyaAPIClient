@@ -1,7 +1,7 @@
 import Foundation
 import Moya
 
-protocol APIClientType<Target> {
+protocol APIClientType<Target>: Sendable {
     associatedtype Target: APITarget
 
     @available(swift, deprecated: 1.2.0, renamed: "send")
@@ -13,19 +13,19 @@ protocol APIClientType<Target> {
     func send(with target: Target) async throws
 }
 
-public enum APIClientError: Error {
+public enum APIClientError: Error, Sendable {
     case faildToDecodeCodable(DecodingError)
     case underlying(Error)
 }
 
-public struct APIClient<Target: APITarget> {
+public actor APIClient<Target: APITarget> {
     private var provider: MoyaProvider<Target>
 
     public init(provider: MoyaProvider<Target> = .init()) {
         self.provider = provider
     }
 
-    public static func stub() -> Self {
+    public static func stub() -> some APIClient {
         APIClient(
             provider: MoyaProvider<Target>(
                 stubClosure: MoyaProvider.immediatelyStub

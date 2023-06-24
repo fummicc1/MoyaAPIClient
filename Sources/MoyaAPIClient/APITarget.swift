@@ -1,7 +1,7 @@
 import Foundation
 import Moya
 
-public protocol APITarget: TargetType {
+public protocol APITarget: TargetType, Sendable {
     var decoder: JSONDecoder { get }
 
     func send<Response: Decodable>(client: (APIClient<Self>)?) async throws -> Response
