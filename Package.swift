@@ -24,10 +24,10 @@ let package = Package(
             name: "MoyaAPIClient",
             dependencies: [
                 .product(name: "Moya", package: "Moya"),
-            ],
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"]),
             ]
+//            swiftSettings: [
+//                .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"]),
+//            ]
         ),
         .testTarget(
             name: "MoyaAPIClientTests",
