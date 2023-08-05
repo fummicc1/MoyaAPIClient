@@ -17,7 +17,7 @@ public extension APITarget {
 }
 
 public extension APITarget {
-    func send<Response: Decodable>(client: (APIClient<Self>)? = nil) async throws -> Response {
+    func send<Response: Decodable & Sendable>(client: (APIClient<Self>)? = nil) async throws -> Response {
         if let client {
             return try await client.send(with: self)
         } else {

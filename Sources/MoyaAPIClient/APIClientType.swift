@@ -18,8 +18,8 @@ public enum APIClientError: Error, Sendable {
     case underlying(Error)
 }
 
-public actor APIClient<Target: APITarget> {
-    private var provider: MoyaProvider<Target>
+public final class APIClient<Target: APITarget>: Sendable {
+    private let provider: MoyaProvider<Target>
 
     public init(provider: MoyaProvider<Target> = .init()) {
         self.provider = provider
@@ -83,3 +83,6 @@ extension APIClient: APIClientType {
         try await send(with: target)
     }
 }
+
+// TODO: Remove when `MoyaProvider` conforms to `Sendable`.
+extension MoyaProvider: @unchecked Sendable {}
